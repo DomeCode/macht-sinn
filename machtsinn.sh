@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ##################################
-## Programm-Name: 	AD_Update	##
+## Programm-Name: 	macht-sinn	##
 ## Creator:			Crosser		##
 ## License:	        GPLv3		##
 ##################################
@@ -17,7 +17,7 @@ SCRIPTVERSION='0.1'
 ARG="$1"
 
 # Set the lock-File location
-LCKFILE="/tmp/ad_update.lck"
+LCKFILE="/tmp/machtsinn.lck"
 
 # Define URL 
 ADURL='http://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&mimetype=plaintext
@@ -117,7 +117,7 @@ get_curr_linecounts() {
 showhelp() {
 	echo "This script generates a Blacklist for ad- and malwareblocking."
 	echo "Since this script needs write-access to $ADNAME, root-privileges are necessary."
-	echo "Usage: ad_update.sh [option]"
+	echo "Usage: machtsinn.sh [option]"
 	echo "	-c || --client		Start to generate the Blacklists in $ADNAME"
 	#echo "	-r || --router		Start to generate the Blacklists in $ADNAME.deny and restart dnsmasq"
 	echo "	-v || --version		Print the version"
@@ -129,7 +129,7 @@ showerror() {
 }
 
 showversion() {
-	echo "AD_Update version $SCRIPTVERSION, where the ADs stop."
+	echo "macht-sinn version $SCRIPTVERSION, where the ADs stop."
 	echo "A true open-source alternative for browser-plugins and other misterious stuff."
 }
 
@@ -141,8 +141,8 @@ showversion() {
 if [ "$ARG" == "--client" ] || [ "$ARG" == "-c" ]; then
 	if [ ! -e "$LCKFILE" ]; then
 		if [ "$(id -u)" != "0" ]; then
-			echo -e "\033[1mError:\033[0m AD_Update needs root-privileges to work correctly."
-			echo -e "Please use \033[1msudo ad_update.sh --help\033[0m for further information."
+			echo -e "\033[1mError:\033[0m macht-sinn needs root-privileges to work correctly."
+			echo -e "Please use \033[1msudo machtsinn.sh --help\033[0m for further information."
 			exit 55
 		else
 			gen_lock
