@@ -3,7 +3,7 @@
 ##################################
 ## Programm-Name: 	AD_Update	##
 ## Creator:			Crosser		##
-## License:			GPLv3		##
+## License:	        GPLv3		##
 ##################################
 
 ###
