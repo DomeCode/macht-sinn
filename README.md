@@ -4,15 +4,17 @@ Ergibt das Sinn?
 
 ## Description
 
-This script generates a Blacklist for ad- and malwareblocking. Remove those ads **without altering your browser-fingerprint**, see the web **as you like**. Let it work on your Router for an adblocking-monster fixing the **whole network** behind it. Ever seen an **ad-free Smartphones**?
+This script generates a Blacklist for ad- and malwareblocking. Remove those ads **without altering your browser-fingerprint**, see the web **as you like**. Let it work on your Router for an adblocking-monster fixing the **whole network** behind it. Ever seen an **ad-free Smartphone**?
 
-Since this script needs write-access to the hostfile defined in $ADNAME, root-privileges are necessary.
+Since this script needs write-access to the hostfile defined in $ADNAME, it will most likely need root-privileges (sudo).
 
 ## Installation
 
 0. Change into the target Git directory
 0. git clone https://github.com/GHCrosser/macht-sinn.git
-0. Eventually edit $ADURL and $ADNAME to your needs
+0. Eventually edit 'ADURL' and 'ADNAME' to your needs
+0. Place the files to the intended destinations
+0. Edit 'CONF' in machtsinn.sh to '/etc/machtsinn/machtsinn.conf'
 0. Fetch the blocklist with 'machtsinn.sh -c'
 0. Enjoy an almost ad-free Internet
 
@@ -37,7 +39,7 @@ Since this script needs write-access to the hostfile defined in $ADNAME, root-pr
 - [x] Work with functions
 - [x] Implement a visual feedback with `--client`
 - [ ] Clean unnecessary code, make it pretty
-- [ ] Put options in /etc/{config}
+- [x] Put options in /etc/{config}
 - [ ] Implement optional logging
 - [ ] Create an OpenWRT package
 - [ ] Create different distro packages

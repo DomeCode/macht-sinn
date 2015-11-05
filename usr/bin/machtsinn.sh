@@ -1,67 +1,51 @@
 #!/bin/bash
 
 ##################################
-## Programm-Name: 	macht-sinn	##
+## Script-Name: 	macht-sinn	##
+## Type:			Script		##
 ## Creator:			Crosser		##
 ## License:	        GPLv3		##
 ##################################
 
-###
-## ~~ Decline and Define Variables ~~ ##
-###
+# Define the config file
+CONF='etc/machtsinn/machtsinn.conf'
 
-# Set AD_Updates version
-SCRIPTVERSION='0.1'
-
-# Insert the given argument into a variable
-ARG="$1"
-
-# Set the lock-File location
-LCKFILE="/tmp/machtsinn.lck"
-
-# Define URL 
-ADURL='http://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&mimetype=plaintext
-http://someonewhocares.org/hosts/hosts
-http://www.malwaredomainlist.com/hostslist/hosts.txt
-http://winhelp2002.mvps.org/hosts.txt
-http://hosts-file.net/download/hosts.txt
-http://hosts-file.net/hphosts-partial.txt
-http://hostsfile.mine.nu/Hosts'
-
-# Define the AD-List Name
-ADNAME='/etc/hosts'
-
-# Define a temp. Host-File
-TMPHOSTS='/tmp/hosts.tmp'
-TMPAD='/tmp/hosts_ad.tmp'
-TMPORIG='/tmp/hosts_orig.tmp'
+# Check and load the config file
+if [ -r "$CONF" ]; then
+	. $CONF
+else
+	echo -e "\033[1mError:\033[0m $CONF is not readable or non existant. Exiting"
+	exit 1
+fi
 
 ###
 ## ~~ Working Part ~~ ##
 ###
 
 gen_lock() {
-	touch $LCKFILE
+	touch "$LCKFILE"
 }
 
+check_errs(){
+  # Parameter 1 is the return code, 2 is the text to display on failure.
+  # Usage: check_errs $? "Error Message"
+  if [ "${1}" -ne "0" ]; then
+    echo "ERROR # ${1} : ${2}"
+    # exit with the right error code.
+    exit ${1}
+  fi
+}
+
+
 gen_temps() {
-	if [ -e "$TMPHOSTS" ]; then
-		rm -f $TMPHOSTS
+	if [ -e "$TMPDIR" ]; then
+		rm -r "$TMPDIR"
 	fi
 
-	if [ -e "$TMPAD" ]; then
-		rm -f $TMPAD
-	fi
-
-	if [ -e "$TMPORIG" ]; then
-		rm -f $TMPORIG
-	fi
-
-	touch $TMPHOSTS
-	touch $TMPAD
-	touch $TMPORIG
+	mkdir "$TMPDIR"
+	touch "$TMPHOSTS" "$TMPAD" $"TMPORIG"
 	
-	grep -vi "^0.0.0.0" $ADNAME >> $TMPORIG
+	grep -vi "^0.0.0.0" "$ADNAME" >> "$TMPORIG"
 }
 
 get_prev_linecounts() {
@@ -71,41 +55,33 @@ get_prev_linecounts() {
 }
 
 get_blacklist() {
-	for i in $ADURL
+	for URL in "$ADURL"
 		do
-			echo -n "Fetching $i ..." && wget -qO - $i | grep -E '^(127.0.0.1|0.0.0.0)' | sed 's/\r$//;s/#.*$//;s/^127.0.0.1/0.0.0.0/;/^.*local$/d;/^.*localdomain$/d;/^.*localhost$/d' >> $TMPHOSTS && echo ' Done'
+			echo -n "Fetching $URL ..." && wget -T "$GETMAXT" -qO - "$URL" | grep -E '^(127.0.0.1|0.0.0.0)' | sed 's/\r$//;s/#.*$//;s/^127.0.0.1/0.0.0.0/;/^.*local$/d;/^.*localdomain$/d;/^.*localhost$/d' >> "$TMPHOSTS" && echo ' Done' || echo ' Failed'
 		done
 }
 
 gen_new_hostfile() {
 	# Copy the current hostfile
-	cat $TMPORIG >> $TMPAD
+	cat "$TMPORIG" >> "$TMPAD"
 
 	# Sort the AD-List
-	sort $TMPHOSTS | uniq -u >> $TMPAD
+	sort "$TMPHOSTS" | uniq -u >> "$TMPAD"
 
 	# Overwrite the current AD-List
 	if [ -e "$ADNAME" ]; then
-		rm -f $ADNAME
+		rm "$ADNAME"
 	fi
-	mv $TMPAD $ADNAME
+	mv "$TMPAD" "$ADNAME"
 }
 
 clean_up() {
-	if [ -e "$TMPHOSTS" ]; then
-		rm -f $TMPHOSTS
-	fi
-
-	if [ -e "$TMPAD" ]; then
-		rm -f $TMPAD
-	fi
-	
-	if [ -e "$TMPORIG" ]; then
-		rm -f $TMPORIG
+	if [ -e "$TMPDIR" ]; then
+		rm -r "$TMPDIR"
 	fi
 	
 	if [ -e "$LCKFILE" ]; then
-		rm -f $LCKFILE
+		rm "$LCKFILE"
 fi
 }
 
@@ -117,7 +93,7 @@ get_curr_linecounts() {
 showhelp() {
 	echo "This script generates a Blacklist for ad- and malwareblocking."
 	echo "Since this script needs write-access to $ADNAME, root-privileges are necessary."
-	echo "Usage: machtsinn.sh [option]"
+	echo "Usage: machtsinn.sh {option}"
 	echo "	-c || --client		Start to generate the Blacklists in $ADNAME"
 	#echo "	-r || --router		Start to generate the Blacklists in $ADNAME.deny and restart dnsmasq"
 	echo "	-v || --version		Print the version"
@@ -142,7 +118,7 @@ if [ "$ARG" == "--client" ] || [ "$ARG" == "-c" ]; then
 	if [ ! -e "$LCKFILE" ]; then
 		if [ "$(id -u)" != "0" ]; then
 			echo -e "\033[1mError:\033[0m macht-sinn needs root-privileges to work correctly."
-			echo -e "Please use \033[1msudo machtsinn.sh --help\033[0m for further information."
+			echo -e "Please use \033[1m machtsinn.sh --help\033[0m for further information."
 			exit 55
 		else
 			gen_lock
