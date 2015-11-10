@@ -7,10 +7,10 @@
 ## License:	        GPLv3		##
 ##################################
 
-# Define the config file
+# Define config file
 CONF='etc/machtsinn/machtsinn.conf'
 
-# Check and load the config file
+# Check and load config file
 if [ -r "$CONF" ]; then
 	. $CONF
 else
@@ -27,11 +27,12 @@ gen_lock() {
 }
 
 check_errs(){
-  # Parameter 1 is the return code, 2 is the text to display on failure.
+  # Parameter 1: Return Code
+  # Parameter 2: Display Text
   # Usage: check_errs $? "Error Message"
   if [ "${1}" -ne "0" ]; then
     echo "ERROR # ${1} : ${2}"
-    # exit with the right error code.
+    # exit with right error code.
     exit ${1}
   fi
 }
@@ -62,13 +63,13 @@ get_blacklist() {
 }
 
 gen_new_hostfile() {
-	# Copy the current hostfile
+	# Copy current hostfile
 	cat "$TMPORIG" >> "$TMPAD"
 
-	# Sort the AD-List
+	# Sort AD-List
 	sort "$TMPHOSTS" | uniq -u >> "$TMPAD"
 
-	# Overwrite the current AD-List
+	# Overwrite current AD-List
 	if [ -e "$ADNAME" ]; then
 		rm "$ADNAME"
 	fi
