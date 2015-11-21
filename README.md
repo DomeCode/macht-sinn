@@ -37,7 +37,7 @@ Since this script needs write-access to the hostfile defined in $ADNAME, it will
 
 - [x] Pull from different adblock lists
 - [x] Work with functions
-- [x] Implement a visual feedback with `--client`
+- [x] Implement a visual feedback with `--generate`
 - [ ] Clean unnecessary code, make it pretty
 - [x] Put options in /etc/{config}
 - [ ] Implement optional logging
@@ -51,7 +51,6 @@ Version 0.1, 29.10.2015: Initial Release
 
 ## Credits
 
-@GHCrosser
 @urgemerge
 @n0wi
 
