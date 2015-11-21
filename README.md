@@ -11,11 +11,11 @@ Since this script needs write-access to the hostfile defined in $ADNAME, it will
 ## Installation
 
 0. Change into the target Git directory
-0. git clone https://github.com/GHCrosser/macht-sinn.git
-0. Eventually edit 'ADURL' and 'ADNAME' to your needs
-0. Place the files to the intended destinations
-0. Edit 'CONF' in machtsinn.sh to '/etc/machtsinn/machtsinn.conf'
-0. Fetch the blocklist with 'machtsinn.sh -c'
+0. Execute 'git clone https://github.com/GHCrosser/macht-sinn.git'
+0. Edit 'machtsinn.conf' to your needs
+0. Place files to the intended destinations
+0. Edit 'CONF' in machtsinn.sh to '/etc/machtsinn/machtsinn.conf' if i forgot it
+0. Fetch the blocklist with 'sudo machtsinn.sh -g'
 0. Enjoy an almost ad-free Internet
 
 ## Usage

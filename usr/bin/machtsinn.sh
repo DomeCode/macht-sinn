@@ -12,7 +12,7 @@
 ###
 
 # Define, check an load config file
-CONF='etc/machtsinn/machtsinn.conf'
+CONF='/etc/machtsinn/machtsinn.conf'
 
 if [ -r "$CONF" ]; then
 	. $CONF
@@ -73,9 +73,9 @@ get_prev_linecounts() {
 }
 
 get_blacklist() {
-	for URL in "$ADURL"
+	for URL in $ADURL
 		do
-			echo -n "Fetching $URL ..." && wget -T "$GETMAXT" -qO - "$URL" | grep -E '^(127.0.0.1|0.0.0.0)' | sed 's/\r$//;s/#.*$//;s/^127.0.0.1/0.0.0.0/;/^.*local$/d;/^.*localdomain$/d;/^.*localhost$/d' >> "$TMPHOSTS" && echo ' Done'
+			echo -n "Fetching $URL ..." && wget -T "$GETMAXT" -qO- "$URL" | grep -E '^(127.0.0.1|0.0.0.0)' | sed 's/\r$//;s/#.*$//;s/^127.0.0.1/0.0.0.0/;/^.*local$/d;/^.*localdomain$/d;/^.*localhost$/d' >> "$TMPHOSTS" && echo ' Done'
 		done
 }
 
