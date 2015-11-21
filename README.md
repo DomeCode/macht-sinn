@@ -21,7 +21,7 @@ Since this script needs write-access to the hostfile defined in $ADNAME, it will
 ## Usage
 
 `machtsinn.sh {option}`
-* `-c || --client` :Start to generate the Blacklists in $ADNAME
+* `-g || --generate` :Start to generate the Blacklist in $ADNAME
 * `-v || --version` :Print the version
 * `-h || --help` :Print the help message
 

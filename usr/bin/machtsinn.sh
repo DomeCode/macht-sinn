@@ -7,16 +7,33 @@
 ## License:	        GPLv3		##
 ##################################
 
-# Define config file
+###
+## ~~ Decline and Define Variables ~~ ##
+###
+
+# Define, check an load config file
 CONF='etc/machtsinn/machtsinn.conf'
 
-# Check and load config file
 if [ -r "$CONF" ]; then
 	. $CONF
 else
 	echo -e "\033[1mError:\033[0m $CONF is not readable or non existant. Exiting"
 	exit 1
 fi
+
+# Set macht-sinn's version
+SCRIPTVERSION='0.1.2'
+
+# Insert first given argument into a variable
+ARG="$1"
+
+# Define temporary files
+TMPHOSTS="$TMPDIR/hosts.tmp"
+TMPAD="$TMPDIR/hosts_ad.tmp"
+TMPORIG="$TMPDIR/hosts_orig.tmp"
+
+# Set lock-File location
+LCKFILE="/var/lock/machtsinn.lck"
 
 ###
 ## ~~ Working Part ~~ ##
@@ -44,7 +61,7 @@ gen_temps() {
 	fi
 
 	mkdir "$TMPDIR"
-	touch "$TMPHOSTS" "$TMPAD" $"TMPORIG"
+	touch "$TMPHOSTS" "$TMPAD" "$TMPORIG"
 	
 	grep -vi "^0.0.0.0" "$ADNAME" >> "$TMPORIG"
 }
@@ -58,7 +75,7 @@ get_prev_linecounts() {
 get_blacklist() {
 	for URL in "$ADURL"
 		do
-			echo -n "Fetching $URL ..." && wget -T "$GETMAXT" -qO - "$URL" | grep -E '^(127.0.0.1|0.0.0.0)' | sed 's/\r$//;s/#.*$//;s/^127.0.0.1/0.0.0.0/;/^.*local$/d;/^.*localdomain$/d;/^.*localhost$/d' >> "$TMPHOSTS" && echo ' Done' || echo ' Failed'
+			echo -n "Fetching $URL ..." && wget -T "$GETMAXT" -qO - "$URL" | grep -E '^(127.0.0.1|0.0.0.0)' | sed 's/\r$//;s/#.*$//;s/^127.0.0.1/0.0.0.0/;/^.*local$/d;/^.*localdomain$/d;/^.*localhost$/d' >> "$TMPHOSTS" && echo ' Done'
 		done
 }
 
@@ -95,8 +112,7 @@ showhelp() {
 	echo "This script generates a Blacklist for ad- and malwareblocking."
 	echo "Since this script needs write-access to $ADNAME, root-privileges are necessary."
 	echo "Usage: machtsinn.sh {option}"
-	echo "	-c || --client		Start to generate the Blacklists in $ADNAME"
-	#echo "	-r || --router		Start to generate the Blacklists in $ADNAME.deny and restart dnsmasq"
+	echo "	-g || --generate	Start to generate the Blacklist in $ADNAME"
 	echo "	-v || --version		Print the version"
 	echo "	-h || --help		Print this message"
 }
@@ -106,7 +122,7 @@ showerror() {
 }
 
 showversion() {
-	echo "macht-sinn version $SCRIPTVERSION, where the ADs stop."
+	echo "macht-sinn version $SCRIPTVERSION, ergibt das Sinn?."
 	echo "A true open-source alternative for browser-plugins and other misterious stuff."
 }
 
@@ -115,7 +131,7 @@ showversion() {
 ###
 
 # Check which commmand should get executed and do so
-if [ "$ARG" == "--client" ] || [ "$ARG" == "-c" ]; then
+if [ "$ARG" == "--generate" ] || [ "$ARG" == "-g" ]; then
 	if [ ! -e "$LCKFILE" ]; then
 		if [ "$(id -u)" != "0" ]; then
 			echo -e "\033[1mError:\033[0m macht-sinn needs root-privileges to work correctly."
@@ -134,9 +150,6 @@ if [ "$ARG" == "--client" ] || [ "$ARG" == "-c" ]; then
 	else
 		echo -e "\033[1mError:\033[0m Lockfile $LCKFILE existant since $(date -r $LCKFILE +%F,T). \033[1mExiting\033[0m"
 	fi
-#elif [ "$ARG" == "--router" ] || [ "$ARG" == "-r" ]; then
-#	echo
-#	/etc/init.d/dnsmasq reload
 elif [ "$ARG" == "--version" ] || [ "$ARG" == "-v" ]; then
 	showversion
 elif [ "$ARG" == "--help" ] || [ "$ARG" == "-h" ] || [ -z "$ARG" ]; then
