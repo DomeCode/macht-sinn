@@ -59,7 +59,11 @@ gen_temps() {
 	if [ -e "$TMPDIR" ]; then
 		rm -r "$TMPDIR"
 	fi
-
+    
+    if [ ! -e "$ADNAME" ]; then
+        touch "$ADNAME"
+    fi
+    
 	mkdir "$TMPDIR"
 	touch "$TMPHOSTS" "$TMPAD" "$TMPORIG"
 	
