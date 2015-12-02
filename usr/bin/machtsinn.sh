@@ -22,7 +22,7 @@ else
 fi
 
 # Set macht-sinn's version
-SCRIPTVERSION='0.1.2'
+SCRIPTVERSION='0.1.2.1'
 
 # Insert first given argument into a variable
 ARG="$1"
@@ -79,7 +79,7 @@ get_prev_linecounts() {
 get_blacklist() {
 	for URL in $ADURL
 		do
-			echo -n "Fetching $URL ..." && wget -T "$GETMAXT" -qO- "$URL" | grep -E '^(127.0.0.1|0.0.0.0)' | sed 's/\r$//;s/#.*$//;s/^127.0.0.1/0.0.0.0/;/^.*local$/d;/^.*localdomain$/d;/^.*localhost$/d' >> "$TMPHOSTS" && echo ' Done'
+			echo -n "Fetching $URL ..." && wget -T "$GETMAXT" -qO- "$URL" | grep -E '^(127.0.0.1|0.0.0.0)' | sed -ru 's/\ri$//;s/#.*$//;s/^127.0.0.1/'"$ADIP"'/;s/^0.0.0.0/'"$ADIP"':/^.*local$/d;/^.*localdomain$/d;/^.*localhost$/d' >> "$TMPHOSTS" && echo ' Done'
 		done
 }
 

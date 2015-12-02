@@ -21,9 +21,9 @@ Since this script needs write-access to the hostfile defined in $ADNAME, it will
 ## Usage
 
 `machtsinn.sh {option}`
-* `-g || --generate` :Start to generate the Blacklist in $ADNAME
-* `-v || --version` :Print the version
-* `-h || --help` :Print the help message
+* `-g || --generate` Start to generate the Blacklist in $ADNAME
+* `-v || --version` Print the version
+* `-h || --help` Print the help message
 
 ## Contributing
 
@@ -41,9 +41,6 @@ Since this script needs write-access to the hostfile defined in $ADNAME, it will
 - [ ] Clean unnecessary code, make it pretty
 - [x] Put options in /etc/{config}
 - [ ] Implement optional logging
-- [ ] Create an OpenWRT package
-- [ ] Create different distro packages
-- [ ] Convert script to Python, Ruby or C++
 
 ## History
 
