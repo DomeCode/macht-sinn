@@ -12,9 +12,10 @@ Since this script needs write-access to the hostfile defined in $ADNAME, it will
 
 0. Change into the target Git directory
 0. Execute 'git clone https://github.com/GHCrosser/macht-sinn.git'
+0. Read 'machtsinn.conf' carefully!
 0. Edit 'machtsinn.conf' to your needs
-0. Place files to the intended destinations
 0. Edit 'CONF' in machtsinn.sh to '/etc/machtsinn/machtsinn.conf' if i forgot it
+0. Place files to the intended destinations
 0. Fetch the blocklist with 'sudo machtsinn.sh -g'
 0. Enjoy an almost ad-free Internet
 
@@ -22,6 +23,8 @@ Since this script needs write-access to the hostfile defined in $ADNAME, it will
 
 `machtsinn.sh {option}`
 * `-g || --generate` Start to generate the Blacklist in $ADNAME
+* `-r || --remove` Remove all blocked hosts in $ADNAME
+* `-c || --clean` Manually start cleaning after the script aborted. Use at your own Risk!
 * `-v || --version` Print the version
 * `-h || --help` Print the help message
 
@@ -41,10 +44,6 @@ Since this script needs write-access to the hostfile defined in $ADNAME, it will
 - [ ] Clean unnecessary code, make it pretty
 - [x] Put options in /etc/{config}
 - [ ] Implement optional logging
-
-## History
-
-Version 0.1, 29.10.2015: Initial Release
 
 ## Credits
 
