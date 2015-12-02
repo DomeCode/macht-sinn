@@ -114,9 +114,10 @@ get_curr_linecounts() {
 
 showhelp() {
 	echo "This script generates a Blacklist for ad- and malwareblocking."
-	echo "Since this script needs write-access to $ADNAME, root-privileges are necessary."
+	echo "Since this script needs write-access to $ADNAME, root-privileges are likely necessary."
 	echo "Usage: machtsinn.sh {option}"
 	echo "	-g || --generate	Start to generate the Blacklist in $ADNAME"
+    echo "  -c || --clean       Manually start cleaning after the script aborted. Use at your own Risk!"
 	echo "	-v || --version		Print the version"
 	echo "	-h || --help		Print this message"
 }
@@ -154,6 +155,8 @@ if [ "$ARG" == "--generate" ] || [ "$ARG" == "-g" ]; then
 	else
 		echo -e "\033[1mError:\033[0m Lockfile $LCKFILE existant since $(date -r $LCKFILE +%F,T). \033[1mExiting\033[0m"
 	fi
+elif [ "$ARG" == "--clean" ] || [ "$ARG" == "-c" ]; then
+    clean_up
 elif [ "$ARG" == "--version" ] || [ "$ARG" == "-v" ]; then
 	showversion
 elif [ "$ARG" == "--help" ] || [ "$ARG" == "-h" ] || [ -z "$ARG" ]; then
