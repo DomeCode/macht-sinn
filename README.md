@@ -19,6 +19,16 @@ Since this script needs write-access to the hostfile defined in $ADNAME, it will
 0. Fetch the blocklist with 'sudo machtsinn.sh -g'
 0. Enjoy an almost ad-free Internet
 
+## Fetched Blocklists (default)
+
+0. http://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&mimetype=plaintext
+0. http://someonewhocares.org/hosts/hosts
+0. http://www.malwaredomainlist.com/hostslist/hosts.txt
+0. http://winhelp2002.mvps.org/hosts.txt
+0. http://hosts-file.net/download/hosts.txt
+0. http://hosts-file.net/hphosts-partial.txt
+0. http://hostsfile.mine.nu/Hosts
+
 ## Usage
 
 `machtsinn.sh {option}`
