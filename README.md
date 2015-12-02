@@ -12,18 +12,31 @@ Since this script needs write-access to the hostfile defined in $ADNAME, it will
 
 0. Change into the target Git directory
 0. Execute 'git clone https://github.com/GHCrosser/macht-sinn.git'
+0. Read 'machtsinn.conf' carefully!
 0. Edit 'machtsinn.conf' to your needs
-0. Place files to the intended destinations
 0. Edit 'CONF' in machtsinn.sh to '/etc/machtsinn/machtsinn.conf' if i forgot it
+0. Place files to the intended destinations
 0. Fetch the blocklist with 'sudo machtsinn.sh -g'
 0. Enjoy an almost ad-free Internet
+
+## Fetched Blocklists (default)
+
+0. http://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&mimetype=plaintext
+0. http://someonewhocares.org/hosts/hosts
+0. http://www.malwaredomainlist.com/hostslist/hosts.txt
+0. http://winhelp2002.mvps.org/hosts.txt
+0. http://hosts-file.net/download/hosts.txt
+0. http://hosts-file.net/hphosts-partial.txt
+0. http://hostsfile.mine.nu/Hosts
 
 ## Usage
 
 `machtsinn.sh {option}`
-* `-g || --generate` :Start to generate the Blacklist in $ADNAME
-* `-v || --version` :Print the version
-* `-h || --help` :Print the help message
+* `-g || --generate` Start to generate the Blacklist in $ADNAME
+* `-r || --remove` Remove all blocked hosts in $ADNAME
+* `-c || --clean` Manually start cleaning after the script aborted. Use at your own Risk!
+* `-v || --version` Print the version
+* `-h || --help` Print the help message
 
 ## Contributing
 
@@ -41,13 +54,6 @@ Since this script needs write-access to the hostfile defined in $ADNAME, it will
 - [ ] Clean unnecessary code, make it pretty
 - [x] Put options in /etc/{config}
 - [ ] Implement optional logging
-- [ ] Create an OpenWRT package
-- [ ] Create different distro packages
-- [ ] Convert script to Python, Ruby or C++
-
-## History
-
-Version 0.1, 29.10.2015: Initial Release
 
 ## Credits
 
