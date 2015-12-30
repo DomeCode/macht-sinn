@@ -51,9 +51,12 @@ Since this script needs write-access to the hostfile defined in $ADNAME, it will
 - [x] Pull from different adblock lists
 - [x] Work with functions
 - [x] Implement a visual feedback with `--generate`
-- [ ] Clean unnecessary code, make it pretty
+- [x] Clean unnecessary code, make it pretty
 - [x] Put options in /etc/{config}
-- [ ] Implement optional logging
+- [x] Implement logging
+- [ ] Perform a pre-running check
+
+Send me your suggestions for new features!
 
 ## Credits
 

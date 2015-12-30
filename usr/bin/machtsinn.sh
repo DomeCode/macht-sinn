@@ -7,9 +7,9 @@
 ## License:	        GPLv3		##
 ##################################
 
-###
-## ~~ Decline and Define Variables ~~ ##
-###
+#####################
+## ~~ Variables ~~ ##
+#####################
 
 # Define, check an load config file
 CONF='/etc/machtsinn/machtsinn.conf'
@@ -17,12 +17,13 @@ CONF='/etc/machtsinn/machtsinn.conf'
 if [ -r "$CONF" ]; then
 	. $CONF
 else
-	echo -e "\033[1mError:\033[0m $CONF is not readable or non existant. Exiting"
+	echo -e "ERROR: $CONF is not readable or non existant."
+    clean_up
 	exit 11
 fi
 
 # Set macht-sinn's version
-SCRIPTVERSION='0.1.2.1'
+SCRIPTVERSION='0.1.2.2'
 
 # Insert first given argument into a variable
 ARG="$1"
@@ -35,28 +36,38 @@ TMPORIG="$TMPDIR/hosts_orig.tmp"
 # Set lock-File location
 LCKFILE="/var/lock/machtsinn.lck"
 
-###
-## ~~ Working Part ~~ ##
-###
+#####################
+## ~~ Functions ~~ ##
+#####################
 
+##
+# Set error messages
+##
+
+printerr_error() {
+    echo "[$(date +%F,%T)] There was an error. Please check the logfile at $LOGFILE"
+}
+
+printerr_root() {
+    echo "[$(date +%F,%T)] ERROR: macht-sinn needs root-privileges to work correctly." | tee -a $LOGFILE
+}
+
+printerr_lock() {
+    echo "[$(date +%F,%T)] ERROR: Lockfile $LCKFILE existant since $(date -r $LCKFILE +%F,%T)." >> $LOGFILE
+}
+
+##
+# Generate needed files
+##
+
+# Generate lockfile
 gen_lock() {
 	if [ ! -e "$LCKFILE" ]; then
         touch "$LCKFILE"
     fi
 }
 
-check_errs(){
-  # Parameter 1: Return Code
-  # Parameter 2: Display Text
-  # Usage: check_errs $? "Error Message"
-  if [ "${1}" -ne "0" ]; then
-    echo "ERROR # ${1} : ${2}"
-    # exit with right error code.
-    exit ${1}
-  fi
-}
-
-
+# Generate temporary files
 gen_temps() {
 	if [ -e "$TMPDIR" ]; then
 		rm -r "$TMPDIR"
@@ -72,22 +83,34 @@ gen_temps() {
 	grep -vi "^$ADIP" "$ADNAME" >> "$TMPORIG"
 }
 
+##
+# Pre blacklist fetching
+##
+
+# Get amount of blocked domains before the script updates them
 get_prev_linecounts() {
 	HOSTORIGCOUNT=$(cat $TMPORIG | wc -l)
 	PREVADNAMECOUNT=$(cat $ADNAME | wc -l)
 	PREVCOUNT=$(($PREVADNAMECOUNT-$HOSTORIGCOUNT))
 }
 
+##
+# Blacklist fetching
+##
+
+# Get all blacklists configured in the config file and filter them
 get_blacklist() {
+echo "[$(date +%F,%T)] Start getting blocklists." | tee -a $LOGFILE
 	for URL in $ADURL
 		do
-			echo -n "Fetching $URL ..." && wget -T "$GETMAXT" -qO- "$URL" | grep -E '^(127.0.0.1|0.0.0.0)' | sed -u 's/\r$//;s/#.*$//;s/^127.0.0.1/'"$ADIP"'/;s/^0.0.0.0/'"$ADIP"'/;/^.*local$/d;/^.*localdomain$/d;/^.*localhost$/d' >> "$TMPHOSTS" && echo ' Done'
+			echo "[$(date +%F,%T)] Fetching $URL" >> $LOGFILE && wget -T "$GETMAXT" -qO- "$URL" | grep -E '^(127.0.0.1|0.0.0.0)' | sed -u 's/\r$//;s/#.*$//;s/^127.0.0.1/'"$ADIP"'/;s/^0.0.0.0/'"$ADIP"'/;/^.*local$/d;/^.*localdomain$/d;/^.*localhost$/d' >> "$TMPHOSTS"
 		done
 }
 
+# Generate the new blocklist file
 gen_new_hostfile() {
     # Echo progress
-    echo -n 'Generating local files ...'
+    echo "[$(date +%F,%T)] Generating local files" >> $LOGFILE
 
 	# Copy current hostfile
 	cat "$TMPORIG" >> "$TMPAD"
@@ -100,11 +123,19 @@ gen_new_hostfile() {
 		rm "$ADNAME"
 	fi
 	mv "$TMPAD" "$ADNAME"
-
-    # Echo progress
-    echo ' Done'
 }
 
+##
+# Post blacklist fetching
+##
+
+# Get amount of blocked domains after the script updated them
+get_curr_linecounts() {
+	CURADNAMECOUNT=$(cat $ADNAME | wc -l)
+	CURCOUNT=$((CURADNAMECOUNT-HOSTORIGCOUNT))
+}
+
+# Delete obsolete files
 clean_up() {
 	if [ -e "$TMPDIR" ]; then
 		rm -r "$TMPDIR"
@@ -115,9 +146,14 @@ clean_up() {
 fi
 }
 
+##
+# User actions
+##
+
+# Remove all blocked hosts from the blocklist file
 remove_adhosts() {
     # Echo progress
-    echo -n 'Removing blocked hosts ...'
+    echo "[$(date +%F,%T)] Removing blocked hosts" | tee -a $LOGFILE
 
     # Check and move blank hosts-file to "$ADNAME"
     if [ -s "$ADNAME" ]; then
@@ -125,55 +161,65 @@ remove_adhosts() {
             rm "$ADNAME"
             mv "$TMPORIG" "$ADNAME"
         else
-            echo -e "\033[1mError:\033[0m $ADNAME is empty, please check the \""'$ADNAME'"\" variable in $CONF! \033[1mExiting\033[0m"
+            echo "[$(date +%F,%T)] ERROR: $ADNAME is empty, please check the \""'$ADNAME'"\" variable in $CONF!" >> $LOGFILE
+            printerr_error
+            clean_up
             exit 33
         fi
     else
-        echo -e "\033[1mError:\033[0m $ADNAME is empty, nothing to remove. \033[1mExiting\033[0m"
+        echo "[$(date +%F,%T)] ERROR: $ADNAME is empty, nothing to remove." >> $LOGFILE
+        printerr_error
+        clean_up
         exit 33
     fi
-    
-    # Echo progress
-    echo ' Done'
 }
 
-get_curr_linecounts() {
-	CURADNAMECOUNT=$(cat $ADNAME | wc -l)
-	CURCOUNT=$((CURADNAMECOUNT-HOSTORIGCOUNT))
-}
+##
+# Generate some prompts
+##
 
+# Show the help prompt
 showhelp() {
 	echo 'This script generates a Blacklist for ad- and malwareblocking.'
 	echo 'Since this script needs write-access to $ADNAME, root-privileges are likely necessary.'
 	echo 'Usage: machtsinn.sh {option}'
-	echo '	-g || --generate	Start to generate the Blacklist in $ADNAME'
+	echo '  -g || --generate    Start to generate the Blacklist in $ADNAME'
     echo '  -r || --remove      Remove all blocked hosts in $ADNAME'
     echo '  -c || --clean       Manually start cleaning after the script aborted. Use at your own Risk!'
-	echo '	-v || --version		Print the version'
-	echo '	-h || --help		Print this message'
+	echo '  -v || --version     Print the version'
+	echo '  -h || --help        Print this message'
 }
 
+# Show the error prompt
 showerror() {
-	echo -e "\033[1mError:\033[0m \"$ARG\" is no valid argument."
+	echo "ERROR: \"$ARG\" is no valid argument."
 }
 
+# Show the version prompt
 showversion() {
-	echo "macht-sinn version $SCRIPTVERSION, ergibt das Sinn?."
-	echo 'A true open-source alternative for browser-plugins and other misterious stuff.'
+	echo "macht-sinn version $SCRIPTVERSION, ergibt das Sinn?"' ¯\_(ツ)_/¯'
+	echo 'A true open-source ad-blocking alternative for browser-plugins and other misterious stuff.'
 }
 
-###
-## ~~ Running Part ~~ ##
-###
+# Show previous and current amount of blocked domains
+showblocked() {
+    echo "[$(date +%F,%T)] Now blocking $CURCOUNT Domains. Previously $PREVCOUNT." | tee -a $LOGFILE   
+}
 
+#####################
+## ~~ Execution ~~ ##
+#####################
+
+##
 # Check which commmand should get executed and do so
+##
+
 # Option "--generate || -g"
 if [ "$ARG" == "--generate" ] || [ "$ARG" == "-g" ]; then
 	if [ ! -e "$LCKFILE" ]; then
 		if [ "$(id -u)" != "0" ]; then
-			echo -e "\033[1mError:\033[0m macht-sinn needs root-privileges to work correctly."
-			echo -e "Please use \033[1m machtsinn.sh --help\033[0m for further information."
-			exit 55
+            printerr_root
+            exit 55
 		else
 			gen_lock
 			gen_temps
@@ -182,18 +228,18 @@ if [ "$ARG" == "--generate" ] || [ "$ARG" == "-g" ]; then
 			gen_new_hostfile
 			get_curr_linecounts
 			clean_up
-			echo "Now blocking $CURCOUNT Domains. Previously $PREVCOUNT."
+            showblocked
 		fi
 	else
-		echo -e "\033[1mError:\033[0m Lockfile $LCKFILE existant since $(date -r $LCKFILE +%T,%F). \033[1mExiting\033[0m"
+        printerr_lock
+        printerr_error
         exit 44
 	fi
 # Option "--remove || -r"
 elif [ "$ARG" == "--remove" ] || [ "$ARG" == "-r" ]; then
     if [ ! -e "$LCKFILE" ]; then
         if [ "$(id -u)" != "0" ]; then
-            echo -e "\033[1mError:\033[0m macht-sinn needs root-privileges to work correctly."
-            echo -e "Please use \033[1m machtsinn.sh --help\033[0m for further information."
+            printerr_root
             exit 55
         else
             gen_lock
@@ -202,17 +248,17 @@ elif [ "$ARG" == "--remove" ] || [ "$ARG" == "-r" ]; then
             remove_adhosts
             get_curr_linecounts
             clean_up
-            echo "Now blocking $CURCOUNT Domains. Previously $PREVCOUNT."
+            showblocked
         fi
     else
-        echo -e "\033[1mError:\033[0m Lockfile $LCKFILE existant since $(date -r $LCKFILE +%T,%F). \033[1mExiting\033[0m"
+        printerr_lock
+        printerr_error
         exit 44
     fi
 # Option "--clean || -c"
 elif [ "$ARG" == "--clean" ] || [ "$ARG" == "-c" ]; then
     if [ "$(id -u)" != "0" ]; then
-        echo -e "\033[1mError:\033[0m macht-sinn needs root-privileges to work correctly."
-        echo -e "Please use \033[1m machtsinn.sh --help\033[0m for further information."
+        printerr_root
         exit 55
     else
         clean_up
