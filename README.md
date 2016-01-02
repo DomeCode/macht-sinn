@@ -52,8 +52,9 @@ Since this script needs write-access to the hostfile defined in $ADNAME, it will
 - [x] Work with functions
 - [x] Implement a visual feedback with `--generate`
 - [x] Clean unnecessary code, make it pretty
-- [x] Put options in /etc/{config}
+- [x] Put options in /etc/machtsinn/machtsinn.conf
 - [x] Implement logging
+- [x] Implement whitelisting (read /etc/machtsinn/README.txt for further information)
 - [ ] Perform a pre-running check
 
 Send me your suggestions for new features!

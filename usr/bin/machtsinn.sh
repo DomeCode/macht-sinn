@@ -33,6 +33,9 @@ TMPHOSTS="$TMPDIR/hosts.tmp"
 TMPAD="$TMPDIR/hosts_ad.tmp"
 TMPORIG="$TMPDIR/hosts_orig.tmp"
 
+# Set whitelist location
+WHITELIST='/etc/machtsinn/whitelist.conf'
+
 # Set lock-File location
 LCKFILE="/var/lock/machtsinn.lck"
 
@@ -103,7 +106,7 @@ get_blacklist() {
 echo "[$(date +%F,%T)] Start getting blocklists." | tee -a $LOGFILE
 	for URL in $ADURL
 		do
-			echo "[$(date +%F,%T)] Fetching $URL" >> $LOGFILE && wget -T "$GETMAXT" -qO- "$URL" | grep -E '^(127.0.0.1|0.0.0.0)' | sed -u 's/\r$//;s/#.*$//;s/^127.0.0.1/'"$ADIP"'/;s/^0.0.0.0/'"$ADIP"'/;/^.*local$/d;/^.*localdomain$/d;/^.*localhost$/d' >> "$TMPHOSTS"
+			echo "[$(date +%F,%T)] Fetching $URL" >> $LOGFILE && wget -T "$GETMAXT" -qO- "$URL" | grep -E '^(127.0.0.1|0.0.0.0)' | sed -u 's/\r$//;s/#.*$//;s/^127.0.0.1/'"$ADIP"'/;s/^0.0.0.0/'"$ADIP"'/;/^.*local$/d;/^.*localdomain$/d;/^.*localhost$/d;s/\s\{1,\}/ /' >> "$TMPHOSTS"
 		done
 }
 
@@ -115,8 +118,17 @@ gen_new_hostfile() {
 	# Copy current hostfile
 	cat "$TMPORIG" >> "$TMPAD"
 
-	# Sort AD-List
-	sort "$TMPHOSTS" | uniq -u >> "$TMPAD"
+	# Sort AD-List and remove whitelisted domains
+    if [ -s "$WHITELIST" ]; then
+        if [ -r "$WHITELIST" ]; then
+            sort "$TMPHOSTS" | uniq -u | grep -vi -f "$WHITELIST" >> "$TMPAD"
+        else
+            echo "[$(date +%F,%T)] WARNING: Whitelist file $WHITELIST is not readable." | tee -a $LOGFILE
+        fi
+    else
+        echo "[$(date +%F,%T)] WARNING: Whitelist file $WHITELIST is non existant or empty." | tee -a $LOGFILE
+	    sort "$TMPHOSTS" | uniq -u >> "$TMPAD"
+    fi
 
 	# Overwrite current AD-List
 	if [ -e "$ADNAME" ]; then
